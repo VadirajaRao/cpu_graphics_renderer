@@ -1,76 +1,96 @@
-/* ****************************************************************************/
-/* NOTES:                                                                     */
-/* Trying to implement creation of GL_VERTEX_SHADER                           */
-/*                                                                            */
-/* You need a shader object first. You either load a shader code here to be   */
-/* compiled or a shader code that's precompiled.                              */
-/*                                                                            */
-/* These are two separate features. The specification requires one of them to */
-/* be supported. The support can be identified by `GL_SHADER_COMPILER` or     */
-/* `GL_NUM_SHADER_BINARY_FORMATS` values respectively.                        */
-/*                                                                            */
-/* If shader source is provided, then compilation shall happen at this stage. */
-/*                                                                            */
-/* In essence shader object shall store two information:                      */
-/*   1. shader source before compilation (if used)                            */
-/*   2. compiled shader code                                                  */
-/*                                                                            */
-/* You need a second object called "program object". The shader object will   */
-/* be linked to this.                                                         */
-/*                                                                            */
-/* The program object is then linked which creates the executable code from   */
-/* all the compiled shader objects. This implies a single program object can  */
-/* be linked with multiple shader objects.                                    */
-/*                                                                            */
-/* A single program object must contain both a vertex and a fragment shader.  */
-/*                                                                            */
-/* You have to mark a program object as a current program object. Based on    */
-/* marking, it is clear which vertex shader and fragment shader code to be    */
-/* used for processing.                                                       */
-/* This is where we may have to bring in the concept of context into picture  */
-/* ****************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
 #include "glTypes.h"
+#include "glError.h"
 #include "glShader.h"
 
-typedef struct
-{
-	/* Shader object data */
-} t_shader_object;
+// The first step in rendering any object is to ensure the pipeline is OK.
+// Majority of the pipeline in the current specification is fixed and what is
+// programmable are handled via shaders.
+//
+// There are two types of shaders we will need to work on:
+//   1. Vertex shader
+//   2. Fragment shader
+//
 
-// As per the specification, we can have many many shader objects with each
-// having different shader sources and different shader types. The specification
-// does not specify the minimum or maximum number of shader objects that needs
-// to be supported. Currently, I am setting an artifical limit of 32 shader
-// objects.
-#define MAX_SHADER_OBJECTS (32U)
-static t_shader_object g_s_shader_object_list[MAX_SHADER_OBJECTS];
-
-// Maintaining a counter to ensure valid shaders are only created. If all
-// shader objects are created should return 0
-static GLuint g_ui_shader_object_count = (
-	(GLuint)(sizeof(t_shader_object) / sizeof(g_s_shader_object_list))
-);
+// Linked list data pointing to shader object list
+static t_list   *gs_p_shader_list       = NULL;
+static t_list   *gs_p_shader_list_head  = NULL;
+static GLuint   g_ui_shader_count       = 0;
 
 GLuint glCreateShader(GLenum par_e_shader_type)
 {
+	// Setting GL_INVALID_OPERATION error code when the shader type is neither
+	// vertex shader nor fragment shader
     if (
-        (GL_VERTEX_SHADER == par_e_shader_type) ||
-        (GL_FRAGMENT_SHADER == par_e_shader_type)
-    )
-    {
-	/* Set GL_INVALID_OPERATION error because the provided name */
-	/* identifies an object that is not the expected type       */
+		(GL_VERTEX_SHADER != par_e_shader_type) &&
+		(GL_FRAGMENT_SHADER != par_e_shader_type)
+	)
+	{
+		// Though this not an actual OpenGL API, it is used to support the
+		// glGetError() API defined by the specification
 		glSetError(GL_INVALID_OPERATION);
 
-		return 0;
-    }
-
-	if (g_s_shader_object_list == 0)
-	{
+		// As per the specification, 0 indicates no shader object is created
 		return 0;
 	}
 
-	g_ui_shader_object_count -= 1;
+	// Allocating memory to a shader object if valid shared object type
+	// is selected
+	t_shader_object *l_p_shader_object = (
+		(t_shader_object *)malloc(sizeof(t_shader_object))
+	);
 
-	return ((GLuint)(MAX_SHADER_OBJECTS - g_ui_shader_object_count));
+	// If shader object cannot be allocated memory, then generate a log because
+	// it is not certain which error code to raise in this scenario. Return  to
+	// indicate shader object creation is a failure.
+	if (NULL == l_p_shader_object)
+	{
+		printf("Unable to create shader object\n");
+		return 0;
+	}
+
+	// Store the shader type into the shader object just created
+	l_p_shader_object->shader_type = par_e_shader_type;
+
+	// Since we will have many shader objects depending on the application need
+	// Create a linked list to store the shader objects created
+	t_list *l_p_shader_list_entry = (t_list *)malloc(sizeof(t_list));
+
+	// If a linked list entry cannot be allocated memory, generate a log
+	// because it is not certain which error code to raise in this scenario.
+	// Return to indicate shader object creation is a failure, after freeing
+	// up the memory allocated to shader object
+	if (NULL == l_p_shader_list_entry)
+	{
+		free(l_p_shader_object);
+
+		printf("Unable to add entry to shader object list\n");
+		return 0;
+	}
+
+    // Make an entry into the shader object list
+	if (gs_p_shader_list == NULL)
+	{
+		gs_p_shader_list        = l_p_shader_list_entry;
+		gs_p_shader_list_head   = l_p_shader_list_entry;
+
+		gs_p_shader_list->data  = l_p_shader_object;
+		gs_p_shader_list->next  = NULL;
+	}
+	else
+	{
+		gs_p_shader_list->next = l_p_shader_list_entry;
+		gs_p_shader_list = gs_p_shader_list->next;
+		gs_p_shader_list->data = l_p_shader_object;
+	}
+
+	// Keep track of the number of shader objects created to assign an ID
+	g_ui_shader_count += 1;
+
+	// Update the shader object with an ID for further operations
+	gs_p_shader_list->data->shader_id = g_ui_shader_count;
+
+	// Return the shader ID
+	return g_ui_shader_count;
 }

@@ -1,4 +1,7 @@
+#include "glTypes.h"
 #include "glError.h"
+
+GLenum g_e_error_code;
 
 GLenum glGetError(void)
 {

@@ -1,9 +1,9 @@
 #ifndef __GL_ERROR_H__
 #define __GL_ERROR_H__
 
-static GLenum g_e_error_code;
+extern GLenum g_e_error_code;
 
-GLenum GL_ERROR_CODES
+enum GL_ERROR_CODE
 {
 	GL_NO_ERROR = 0,
 	GL_INVALID_ENUM,
@@ -13,5 +13,8 @@ GLenum GL_ERROR_CODES
 	GL_OUT_OF_MEMORY,
 	GL_ERROR_CODE_MAX
 };
+
+GLenum glGetError(void);
+void glSetError(GLenum par_e_error_code);
 
 #endif /* __GL_ERROR_H__ */
