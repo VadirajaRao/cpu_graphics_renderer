@@ -11,7 +11,7 @@ add_library(opengl_es2 STATIC
 # Set the include directory
 target_include_directories(opengl_es2
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/shader
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 add_library(OpenGL::es2 ALIAS opengl_es2)

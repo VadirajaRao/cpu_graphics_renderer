@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "glTypes.h"
-#include "glError.h"
+#include "error/glError.h"
 #include "glShader.h"
+#include "gles2.h"
 
 // The first step in rendering any object is to ensure the pipeline is OK.
 // Majority of the pipeline in the current specification is fixed and what is

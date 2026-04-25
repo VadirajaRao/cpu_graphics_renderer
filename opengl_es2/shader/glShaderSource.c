@@ -8,6 +8,51 @@
 
 extern t_list *gs_p_shader_list;
 
+static inline void validate_shader_id(GLuint par_u32_shader)
+{
+    if (par_u32_shader == 0)
+    {
+        fprintf(
+            stderr,
+            "  [ERR] glShaderSource: Given shader ID is invalid\n"
+        );
+    }
+}
+
+static inline void validate_line_count(GLsizei par_sz_count)
+{
+    if (par_sz_count == 0)
+    {
+        fprintf(
+            stderr,
+            "  [ERR] glShaderSource: Shader source does not have any lines\n"
+        );
+    }
+}
+
+static inline void validate_shader_source(const char **par_ppc_string)
+{
+    if (par_ppc_string == NULL)
+    {
+        fprintf(
+            stderr,
+            "  [ERR] glShaderSource: No shader source specified\n"
+        );
+    }
+}
+
+static inline void validate_line_length(GLint *par_i32_length)
+{
+    if (par_i32_length != NULL)
+    {
+        fprintf(
+            stderr,
+            "  [ERR] glShaderSource: Only null terminate shader source lines"
+            " are accepted\n"
+        );
+    }
+}
+
 void glShaderSource(
 	GLuint      par_u32_shader,
 	GLsizei     par_sz_count,
@@ -15,46 +60,10 @@ void glShaderSource(
 	GLint       *par_i32_length
 )
 {
-	if (par_u32_shader == 0)
-	{
-		fprintf(
-			stderr,
-			"  [ERR] glShaderSource: Given shader ID is invalid\n"
-		);
-
-		return;
-	}
-
-	if (par_sz_count == 0)
-	{
-		fprintf(
-			stderr,
-			"  [ERR] glShaderSource: Shader source does not have any lines\n"
-		);
-
-		return;
-	}
-
-	if (par_ppc_string == NULL)
-	{
-		fprintf(
-			stderr,
-			"  [ERR] glShaderSource: No shader source specified\n"
-		);
-
-		return;
-	}
-
-	if (par_i32_length != NULL)
-	{
-		fprintf(
-			stderr,
-			"  [ERR] glShaderSource: Only null terminated shader source lines"
-			" are accepted\n"
-		);
-
-		return;
-	}
+    validate_shader_id(par_u32_shader);
+    validate_line_count(par_sz_count);
+    validate_shader_source(par_ppc_string);
+    validate_line_length(par_i32_length);
 
 	char l_str_shader_source[] = "/tmp/softgl/shader_source_XXXXXX.c";
 

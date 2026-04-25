@@ -18,3 +18,5 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Including OpenGL ES2 library
 add_subdirectory(opengl_es2)
+
+add_subdirectory(demo)
