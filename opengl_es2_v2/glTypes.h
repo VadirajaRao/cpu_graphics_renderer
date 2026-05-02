@@ -18,6 +18,7 @@ enum GLShaderType
 enum GLErrorType
 {
     GL_SUCCESS = 0x0,
+    GL_INVALID_VALUE,
     GL_INVALID_OPERATION
 };
 
@@ -28,5 +29,6 @@ GLvoid glShaderSource(
     const GLchar    **par_ppc_shader_source,
     const GLint     *par_pi_line_lengths
 );
+GLenum glGetError(void);
 
 #endif /* __GL_TYPES_H__ */

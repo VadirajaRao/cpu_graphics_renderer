@@ -15,6 +15,7 @@ GLchar *gs_ppc_vertex_shader_source[36] =
 int main(void)
 {
     GLuint l_u_vertex_shader_id = 0;
+    GLenum l_e_error = GL_SUCCESS;
 
     l_u_vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
 
@@ -22,7 +23,8 @@ int main(void)
     {
         fprintf(
             stderr,
-            "  [ERR] main: Failed to create vertex shader\n"
+            "  [ERR] main: Failed to create vertex shader. GL Error: %u\n",
+            glGetError()
         );
     }
 
@@ -32,6 +34,16 @@ int main(void)
         (const GLchar **)gs_ppc_vertex_shader_source,
         NULL
     );
+
+    l_e_error = glGetError();
+    if (l_e_error != GL_SUCCESS)
+    {
+        fprintf(
+            stderr,
+            "  [ERR] main: Failed to set vertex shader source. GL Error: %u\n",
+            l_e_error
+        );
+    }
 
     printf("Program execution complete\n");
 

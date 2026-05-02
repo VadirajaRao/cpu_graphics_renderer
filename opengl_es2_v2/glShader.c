@@ -12,6 +12,15 @@
 static GLenum gs_e_gl_error;
 static GLuint gs_u_shader_id_counter;
 
+GLenum glGetError(void)
+{
+    GLenum l_e_error = gs_e_gl_error;
+
+    gs_e_gl_error = GL_SUCCESS;
+
+    return l_e_error;
+}
+
 GLuint glCreateShader(GLenum par_e_shader_type)
 {
     if ((par_e_shader_type != GL_VERTEX_SHADER) &&
@@ -23,7 +32,7 @@ GLuint glCreateShader(GLenum par_e_shader_type)
             par_e_shader_type
         );
 
-        gs_e_gl_error = GL_INVALID_OPERATION;
+        gs_e_gl_error = GL_INVALID_VALUE;
 
         return 0;
     }
@@ -50,7 +59,9 @@ GLvoid glShaderSource(
             par_u_shader_id
         );
 
-        exit(1);
+        gs_e_gl_error = GL_INVALID_VALUE;
+
+        return;
     }
 
     if (par_s_line_count == 0)
@@ -60,7 +71,9 @@ GLvoid glShaderSource(
             "  [ERR] glShaderSource: Invalid shader source line count\n"
         );
 
-        exit(1);
+        gs_e_gl_error = GL_INVALID_VALUE;
+
+        return;
     }
 
     if (par_ppc_shader_source == NULL)
@@ -70,7 +83,9 @@ GLvoid glShaderSource(
             "  [ERR] glShaderSource: Shader source is not provided\n"
         );
 
-        exit(1);
+        gs_e_gl_error = GL_INVALID_VALUE;
+
+        return;
     }
 
     GLchar l_str_shader_source[] = "/tmp/softgl/shader_source_XXXXXX";
