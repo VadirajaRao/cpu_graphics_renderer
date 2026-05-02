@@ -1,5 +1,0 @@
-set(SHADER_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/glCreateShader.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/glShaderSource.c
-  PARENT_SCOPE
-)
